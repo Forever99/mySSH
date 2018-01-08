@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-4.2.xsd 
+http://www.springframework.org/schema/context
+ http://www.springframework.org/schema/context/spring-context-4.2.xsd 
+ http://www.springframework.org/schema/aop
+  http://www.springframework.org/schema/aop/spring-aop-4.2.xsd 
+http://www.springframework.org/schema/tx 
+http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+
+
+	<!-- 配置c3p0连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<!-- 注入属性值 -->
+		<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/ssh"></property>
+		<property name="user" value="root"></property>
+		<property name="password" value="1234"></property>
+	</bean>
+
+
+
+
+
+	<!-- 配置sessionFactory对象 -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<!-- 指定数据库信息 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 指定使用hibernate核心配置文件配置 -->
+		<property name="configLocations" value="classpath:hibernate.cfg.xml"></property>
+	</bean>
+
+
+
+	<!-- 配置action对象 -->
+	<bean id="userAction" class="cn.zhku.jsj144.ssh.action.UserAction" scope="prototype">
+	<!-- 注入属性 -->
+		<property name="userService" ref="userService"></property>
+	</bean>
+	
+	
+	
+
+	<bean id="userService" class="cn.zhku.jsj144.ssh.action.UserService">
+		<!-- 注入属性 -->
+		<property name="userDao" ref="userDao"></property>
+	</bean>
+	<bean id="userDao" class="cn.zhku.jsj144.ssh.action.UserDaoImpl">
+		<!-- 注入属性 -->
+		<property name="hibernateTemplate" ref="hibernateTemplate"></property>
+	</bean>
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate5.HibernateTemplate">
+		<!-- 注入属性 -->
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+
+
+	<!-- 1、配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- 注入数据源，才知道对哪个数据库进行事务管理 -->
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- 2、开启事务注解 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+
+</beans>
+
+
+
+
+
+
+
+
